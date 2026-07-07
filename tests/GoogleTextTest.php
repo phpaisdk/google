@@ -53,6 +53,23 @@ it('generates text end to end through the Google vertical', function () {
         ->and($client->lastRequest->getHeaderLine('x-goog-api-key'))->toBe('gemini-test');
 });
 
+it('normalizes camel case text usage fields', function () {
+    $client = new FakeHttpClient(200, json_encode([
+        'output_text' => 'Hello from Gemini',
+        'finish_reason' => 'stop',
+        'usage' => ['inputTokens' => 14, 'outputTokens' => 7, 'totalTokens' => 21],
+    ]));
+    configureGoogleWith($client);
+
+    Google::create(['apiKey' => 'gemini-test']);
+
+    $result = Generate::text('Hi')->model(Google::model('gemini-3.5-flash'))->run();
+
+    expect($result->usage->inputTokens)->toBe(14)
+        ->and($result->usage->outputTokens)->toBe(7)
+        ->and($result->usage->totalTokens)->toBe(21);
+});
+
 it('generates images through the Google vertical', function () {
     $client = new FakeHttpClient(200, json_encode([
         'model' => 'gemini-3.1-flash-image',

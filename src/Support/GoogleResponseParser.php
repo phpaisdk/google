@@ -113,15 +113,11 @@ final class GoogleResponseParser
             return Usage::empty();
         }
 
-        $input = (int) ($usage['input_tokens'] ?? $usage['promptTokenCount'] ?? $usage['prompt_token_count'] ?? 0);
-        $output = (int) ($usage['output_tokens'] ?? $usage['candidatesTokenCount'] ?? $usage['candidates_token_count'] ?? 0);
-        $reasoning = (int) ($usage['thoughtsTokenCount'] ?? $usage['thoughts_token_count'] ?? 0);
-        $cached = isset($usage['cachedContentTokenCount'])
-            ? (int) $usage['cachedContentTokenCount']
-            : (isset($usage['cached_content_token_count']) ? (int) $usage['cached_content_token_count'] : null);
-        $total = isset($usage['total_tokens'])
-            ? (int) $usage['total_tokens']
-            : (isset($usage['totalTokenCount']) ? (int) $usage['totalTokenCount'] : null);
+        $input = self::intValue($usage, 'input_tokens', 'inputTokens', 'promptTokenCount', 'prompt_token_count') ?? 0;
+        $output = self::intValue($usage, 'output_tokens', 'outputTokens', 'candidatesTokenCount', 'candidates_token_count') ?? 0;
+        $reasoning = self::intValue($usage, 'reasoning_tokens', 'reasoningTokens', 'thoughtsTokenCount', 'thoughts_token_count') ?? 0;
+        $cached = self::intValue($usage, 'cachedContentTokenCount', 'cached_content_token_count', 'cachedInputTokens', 'cached_input_tokens');
+        $total = self::intValue($usage, 'total_tokens', 'totalTokens', 'totalTokenCount', 'total_token_count');
 
         return new Usage(
             inputTokens: $input,
@@ -130,6 +126,21 @@ final class GoogleResponseParser
             reasoningTokens: $reasoning > 0 ? $reasoning : null,
             cachedInputTokens: $cached,
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
+     * @param  non-empty-string  ...$keys
+     */
+    private static function intValue(array $values, string ...$keys): ?int
+    {
+        foreach ($keys as $key) {
+            if (isset($values[$key]) && is_numeric($values[$key])) {
+                return (int) $values[$key];
+            }
+        }
+
+        return null;
     }
 
     /**
