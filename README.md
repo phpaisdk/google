@@ -52,6 +52,21 @@ foreach ($stream->chunks() as $chunk) {
 $result = $stream->run();
 ```
 
+## Image Generation
+
+```php
+use AiSdk\Generate;
+use AiSdk\Google;
+
+$result = Generate::image()
+    ->model(Google::image('gemini-3.1-flash-image'))
+    ->prompt('A clean app icon for a PHP AI SDK')
+    ->aspectRatio('1:1')
+    ->run();
+
+$result->output->save(__DIR__.'/icon.png');
+```
+
 ## Provider-Specific Options
 
 ```php
