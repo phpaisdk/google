@@ -1,0 +1,33 @@
+{
+  "provider": "google",
+  "models": [
+    {
+      "id": "gemini-3*",
+      "lab": "google",
+      "status": "stable",
+      "modalities": ["text"],
+      "capabilities": ["text_generation", "streaming", "tool_calling", "structured_output", "reasoning", "text_input", "image_input", "audio_input", "file_input"]
+    },
+    {
+      "id": "gemini-2.5*",
+      "lab": "google",
+      "status": "stable",
+      "modalities": ["text"],
+      "capabilities": ["text_generation", "streaming", "tool_calling", "structured_output", "reasoning", "text_input", "image_input", "audio_input", "file_input"]
+    },
+    {
+      "id": "gemini-2.0*",
+      "lab": "google",
+      "status": "stable",
+      "modalities": ["text"],
+      "capabilities": ["text_generation", "streaming", "tool_calling", "structured_output", "text_input", "image_input", "audio_input", "file_input"]
+    },
+    {
+      "id": "gemini-1.5*",
+      "lab": "google",
+      "status": "stable",
+      "modalities": ["text"],
+      "capabilities": ["text_generation", "streaming", "tool_calling", "structured_output", "text_input", "image_input", "audio_input", "file_input"]
+    }
+  ]
+}
