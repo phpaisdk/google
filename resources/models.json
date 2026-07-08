@@ -2,6 +2,19 @@
   "provider": "google",
   "models": [
     {
+      "id": "gemini-3.1-flash-tts-preview",
+      "lab": "google",
+      "status": "preview",
+      "modalities": [
+        "audio",
+        "text"
+      ],
+      "capabilities": [
+        "speech_generation",
+        "text_input"
+      ]
+    },
+    {
       "id": "gemini-3.1-flash-lite-image",
       "lab": "google",
       "status": "stable",

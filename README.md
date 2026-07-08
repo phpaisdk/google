@@ -67,6 +67,37 @@ $result = Generate::image()
 $result->output->save(__DIR__.'/icon.png');
 ```
 
+## Speech Generation
+
+```php
+use AiSdk\Generate;
+use AiSdk\Google;
+
+$result = Generate::speech()
+    ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+    ->input('Say cheerfully: Have a wonderful day!')
+    ->voice('Kore')
+    ->run();
+
+$result->output->save(__DIR__.'/speech.wav');
+```
+
+Google speech generation uses Gemini Interactions API audio responses. You can pass native speech configuration through provider options:
+
+```php
+$result = Generate::speech('Read this as a short dialogue.')
+    ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+    ->providerOptions('google', [
+        'generation_config' => [
+            'speech_config' => [
+                ['speaker' => 'Joe', 'voice' => 'Kore'],
+                ['speaker' => 'Jane', 'voice' => 'Puck'],
+            ],
+        ],
+    ])
+    ->run();
+```
+
 ## Provider-Specific Options
 
 ```php

@@ -109,6 +109,39 @@ it('generates images through the Google vertical', function () {
         ->and($client->lastRequest->getHeaderLine('x-goog-api-key'))->toBe('gemini-test');
 });
 
+it('generates speech through the Google vertical', function () {
+    $client = new FakeHttpClient(200, json_encode([
+        'id' => 'interaction_speech',
+        'model' => 'gemini-3.1-flash-tts-preview',
+        'output_audio' => [
+            'data' => base64_encode('wav-bytes'),
+            'mime_type' => 'audio/wav',
+        ],
+    ]));
+    configureGoogleWith($client);
+
+    Google::create(['apiKey' => 'gemini-test']);
+
+    $result = Generate::speech()
+        ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+        ->input('Say cheerfully: Have a wonderful day!')
+        ->voice('Kore')
+        ->run();
+
+    expect($result->output->data)->toBe('wav-bytes')
+        ->and($result->output->mimeType)->toBe('audio/wav')
+        ->and($result->providerMetadata['google']['id'])->toBe('interaction_speech');
+
+    $body = $client->sentBody();
+    expect($body['model'])->toBe('gemini-3.1-flash-tts-preview')
+        ->and($body['input'])->toBe('Say cheerfully: Have a wonderful day!')
+        ->and($body['response_format'])->toBe(['type' => 'audio'])
+        ->and($body['generation_config']['speech_config'][0]['voice'])->toBe('Kore');
+
+    expect($client->lastRequest->getUri()->getPath())->toBe('/v1beta/interactions')
+        ->and($client->lastRequest->getHeaderLine('x-goog-api-key'))->toBe('gemini-test');
+});
+
 it('sends system instructions and thinking level through generation config', function () {
     $client = new FakeHttpClient(200, json_encode([
         'output_text' => 'Done',
@@ -133,5 +166,6 @@ it('loads model capabilities from resources models json', function () {
 
     expect(Google::model('gemini-3.5-flash')->supports(Capability::Reasoning))->toBeTrue()
         ->and(Google::model('gemini-2.0-flash')->supports(Capability::ImageInput))->toBeTrue()
-        ->and(Google::image('gemini-3.1-flash-image')->supports(Capability::ImageGeneration))->toBeTrue();
+        ->and(Google::image('gemini-3.1-flash-image')->supports(Capability::ImageGeneration))->toBeTrue()
+        ->and(Google::speech('gemini-3.1-flash-tts-preview')->supports(Capability::SpeechGeneration))->toBeTrue();
 });
