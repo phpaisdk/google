@@ -40,6 +40,28 @@ Google::create([
 ]);
 ```
 
+## Embeddings
+
+```php
+$result = Generate::embedding([
+    'PHP is a programming language.',
+    'Laravel is a PHP framework.',
+])
+    ->model(Google::embedding('gemini-embedding-001'))
+    ->dimensions(768)
+    ->providerOptions('google', [
+        'embedContentConfig' => [
+            'taskType' => 'RETRIEVAL_DOCUMENT',
+            'autoTruncate' => true,
+        ],
+    ])
+    ->run();
+
+$vector = $result->embeddings[0]->vector;
+```
+
+The package uses `embedContent` for one text input and `batchEmbedContents` for multiple text inputs. Native Google embedding configuration can be passed through `embedContentConfig`; the portable `dimensions()` option maps to `outputDimensionality`.
+
 ## Streaming
 
 ```php
@@ -119,3 +141,8 @@ $result = Generate::text('Hello')
 ```bash
 composer test
 ```
+
+## Links
+
+- [Google Embeddings API](https://ai.google.dev/api/embeddings)
+- [Core Package](https://github.com/phpaisdk/core)
