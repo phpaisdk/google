@@ -23,6 +23,8 @@ $result = Generate::text()
 echo $result->text;
 ```
 
+Google model IDs pass through unchanged and do not need to be registered. This package does not ship a model inventory; the SDK performs internal adapter validation before Google validates support for the selected model.
+
 ## Configuration
 
 | Variable | Description | Default |

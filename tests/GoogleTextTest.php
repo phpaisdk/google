@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use AiSdk\Capability;
 use AiSdk\Generate;
 use AiSdk\Google;
 use AiSdk\Google\Tests\Fakes\FakeHttpClient;
@@ -161,11 +160,10 @@ it('sends system instructions and thinking level through generation config', fun
         ->and($body['generation_config']['thinking_level'])->toBe('low');
 });
 
-it('loads model capabilities from resources models json', function () {
+it('accepts opaque model ids for every implemented modality', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
-    expect(Google::model('gemini-3.5-flash')->supports(Capability::Reasoning))->toBeTrue()
-        ->and(Google::model('gemini-2.0-flash')->supports(Capability::ImageInput))->toBeTrue()
-        ->and(Google::image('gemini-3.1-flash-image')->supports(Capability::ImageGeneration))->toBeTrue()
-        ->and(Google::speech('gemini-3.1-flash-tts-preview')->supports(Capability::SpeechGeneration))->toBeTrue();
+    expect(Google::model('future-text-model')->modelId())->toBe('future-text-model')
+        ->and(Google::image('future-image-model')->modelId())->toBe('future-image-model')
+        ->and(Google::speech('future-speech-model')->modelId())->toBe('future-speech-model');
 });

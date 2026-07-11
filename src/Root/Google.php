@@ -9,12 +9,9 @@ use AiSdk\Contracts\SpeechModelInterface;
 use AiSdk\Contracts\TextModelInterface;
 use AiSdk\Google\GoogleOptions;
 use AiSdk\Google\GoogleProvider;
-use AiSdk\Support\Concerns\RegistersModels;
 
 final class Google
 {
-    use RegistersModels;
-
     private static ?GoogleProvider $default = null;
 
     /**

@@ -23,16 +23,16 @@ final class GoogleProvider extends BaseProvider
 
     public function textModel(string $modelId): TextModelInterface
     {
-        return new GoogleTextModel($modelId, $this->options, $this->modelRegistry());
+        return new GoogleTextModel($modelId, $this->options);
     }
 
     public function imageModel(string $modelId): ImageModelInterface
     {
-        return new GoogleImageModel($modelId, $this->options, $this->modelRegistry());
+        return new GoogleImageModel($modelId, $this->options);
     }
 
     public function speechModel(string $modelId): SpeechModelInterface
     {
-        return new GoogleSpeechModel($modelId, $this->options, $this->modelRegistry());
+        return new GoogleSpeechModel($modelId, $this->options);
     }
 }

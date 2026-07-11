@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace AiSdk\Google\Models;
 
-use AiSdk\Capability;
-use AiSdk\CapabilitySupport;
 use AiSdk\Contracts\BaseModel;
 use AiSdk\Contracts\SpeechModelInterface;
 use AiSdk\Google\GoogleOptions;
 use AiSdk\Requests\SpeechRequest;
 use AiSdk\Responses\SpeechResponse;
 use AiSdk\Results\AudioData;
-use AiSdk\Support\ModelCatalog;
-use AiSdk\Support\ModelRegistry;
 use AiSdk\Support\Usage;
 use AiSdk\Utils\Support\Url;
 
@@ -22,7 +18,6 @@ final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
     public function __construct(
         private readonly string $modelId,
         private readonly GoogleOptions $options,
-        private readonly ?ModelRegistry $registry = null,
     ) {}
 
     public function provider(): string
@@ -33,34 +28,6 @@ final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
     public function modelId(): string
     {
         return $this->modelId;
-    }
-
-    /**
-     * @return array<int, Capability>
-     */
-    public function capabilities(): array
-    {
-        $definition = $this->registry?->resolve($this->provider(), $this->modelId);
-        if ($definition !== null) {
-            return $this->configuredCapabilities($definition->capabilities);
-        }
-
-        return $this->configuredCapabilities($this->catalog()->capabilities($this->modelId));
-    }
-
-    public function capability(Capability $capability): CapabilitySupport
-    {
-        $configured = $this->configuredCapability($capability);
-        if ($configured !== null) {
-            return $configured;
-        }
-
-        $registered = $this->registry?->capability($this->provider(), $this->modelId, $capability);
-        if ($registered !== null) {
-            return $registered;
-        }
-
-        return $this->catalog()->capability($this->modelId, $capability);
     }
 
     public function generate(SpeechRequest $request): SpeechResponse
@@ -142,10 +109,5 @@ final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
         }
 
         return $metadata;
-    }
-
-    private function catalog(): ModelCatalog
-    {
-        return ModelCatalog::fromFile(dirname(__DIR__, 2).'/resources/models.json');
     }
 }
