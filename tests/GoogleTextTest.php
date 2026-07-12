@@ -72,14 +72,10 @@ it('normalizes camel case text usage fields', function () {
 it('generates images through the Google vertical', function () {
     $client = new FakeHttpClient(200, json_encode([
         'model' => 'gemini-3.1-flash-image',
-        'candidates' => [[
-            'content' => [
-                'parts' => [
-                    ['text' => 'Generated image'],
-                    ['inlineData' => ['mimeType' => 'image/png', 'data' => base64_encode('png-bytes')]],
-                ],
-            ],
-        ]],
+        'output_image' => [
+            'data' => base64_encode('png-bytes'),
+            'mime_type' => 'image/png',
+        ],
         'usageMetadata' => ['promptTokenCount' => 5, 'candidatesTokenCount' => 7, 'totalTokenCount' => 12],
     ]));
     configureGoogleWith($client);
@@ -99,23 +95,22 @@ it('generates images through the Google vertical', function () {
         ->and($result->usage->outputTokens)->toBe(7);
 
     $body = $client->sentBody();
-    expect($body['contents'][0]['parts'][0]['text'])->toBe('A tiny banana spaceship')
-        ->and($body['generation_config']['response_modalities'])->toBe(['TEXT', 'IMAGE'])
-        ->and($body['generation_config']['image_config']['aspect_ratio'])->toBe('16:9')
-        ->and($body['generation_config']['image_config']['image_size'])->toBe('2K');
+    expect($body['input'][0]['text'])->toBe('A tiny banana spaceship')
+        ->and($body['model'])->toBe('gemini-3.1-flash-image')
+        ->and($body['response_format']['aspect_ratio'])->toBe('16:9')
+        ->and($body['response_format']['image_size'])->toBe('2K');
 
-    expect($client->lastRequest->getUri()->getPath())->toBe('/v1beta/models/gemini-3.1-flash-image:generateContent')
+    expect($client->lastRequest->getUri()->getPath())->toBe('/v1beta/interactions')
         ->and($client->lastRequest->getHeaderLine('x-goog-api-key'))->toBe('gemini-test');
 });
 
 it('generates speech through the Google vertical', function () {
     $client = new FakeHttpClient(200, json_encode([
-        'id' => 'interaction_speech',
-        'model' => 'gemini-3.1-flash-tts-preview',
         'output_audio' => [
             'data' => base64_encode('wav-bytes'),
             'mime_type' => 'audio/wav',
         ],
+        'model' => 'gemini-3.1-flash-tts-preview',
     ]));
     configureGoogleWith($client);
 
@@ -129,7 +124,7 @@ it('generates speech through the Google vertical', function () {
 
     expect($result->output->data)->toBe('wav-bytes')
         ->and($result->output->mimeType)->toBe('audio/wav')
-        ->and($result->providerMetadata['google']['id'])->toBe('interaction_speech');
+        ->and($result->providerMetadata['google']['model'])->toBe('gemini-3.1-flash-tts-preview');
 
     $body = $client->sentBody();
     expect($body['model'])->toBe('gemini-3.1-flash-tts-preview')

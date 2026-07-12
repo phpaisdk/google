@@ -8,14 +8,20 @@ use AiSdk\Contracts\BaseProvider;
 use AiSdk\Contracts\EmbeddingModelInterface;
 use AiSdk\Contracts\EmbeddingProviderInterface;
 use AiSdk\Contracts\ImageModelInterface;
+use AiSdk\Contracts\ImageProviderInterface;
 use AiSdk\Contracts\SpeechModelInterface;
+use AiSdk\Contracts\SpeechProviderInterface;
 use AiSdk\Contracts\TextModelInterface;
+use AiSdk\Contracts\TextProviderInterface;
+use AiSdk\Contracts\VideoModelInterface;
+use AiSdk\Contracts\VideoProviderInterface;
 use AiSdk\Google\Models\GoogleEmbeddingModel;
 use AiSdk\Google\Models\GoogleImageModel;
 use AiSdk\Google\Models\GoogleSpeechModel;
 use AiSdk\Google\Models\GoogleTextModel;
+use AiSdk\Google\Models\GoogleVideoModel;
 
-final class GoogleProvider extends BaseProvider implements EmbeddingProviderInterface
+final class GoogleProvider extends BaseProvider implements EmbeddingProviderInterface, ImageProviderInterface, SpeechProviderInterface, TextProviderInterface, VideoProviderInterface
 {
     public function __construct(public readonly GoogleOptions $options) {}
 
@@ -42,5 +48,10 @@ final class GoogleProvider extends BaseProvider implements EmbeddingProviderInte
     public function embeddingModel(string $modelId): EmbeddingModelInterface
     {
         return new GoogleEmbeddingModel($modelId, $this->options);
+    }
+
+    public function videoModel(string $modelId): VideoModelInterface
+    {
+        return new GoogleVideoModel($modelId, $this->options);
     }
 }

@@ -124,6 +124,17 @@ $result = Generate::speech('Read this as a short dialogue.')
 
 ## Provider-Specific Options
 
+## Video Generation
+
+```php
+$result = Generate::video('A cinematic ocean scene')
+    ->model(Google::video('veo-3.1-generate-preview'))
+    ->aspectRatio('16:9')
+    ->resolution('1280x720')
+    ->duration(8)
+    ->run(timeout: 600);
+```
+
 ```php
 $result = Generate::text('Hello')
     ->model(Google::model('gemini-3.5-flash'))

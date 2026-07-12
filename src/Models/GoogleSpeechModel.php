@@ -6,6 +6,7 @@ namespace AiSdk\Google\Models;
 
 use AiSdk\Contracts\BaseModel;
 use AiSdk\Contracts\SpeechModelInterface;
+use AiSdk\Exceptions\InvalidResponseException;
 use AiSdk\Google\GoogleOptions;
 use AiSdk\Requests\SpeechRequest;
 use AiSdk\Responses\SpeechResponse;
@@ -39,6 +40,9 @@ final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
             ->postJson($url, $body, $this->options->authHeaders(), $this->provider());
 
         $audio = $this->audio($payload);
+        if ($audio === null) {
+            throw InvalidResponseException::forProvider($this->provider(), 'Google returned no generated audio.', ['body' => $payload]);
+        }
 
         return new SpeechResponse(
             audio: new AudioData(
@@ -69,29 +73,34 @@ final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
             ],
         ];
 
-        return array_replace_recursive($body, $request->providerOptionsFor($this->provider()));
+        $options = $request->providerOptionsFor($this->provider());
+        $raw = $options['raw'] ?? null;
+        unset($options['raw']);
+        $body = array_replace_recursive($body, $options);
+
+        return is_array($raw) ? array_replace_recursive($body, $raw) : $body;
     }
 
     /**
      * @param  array<string, mixed>  $payload
-     * @return array{data: string, mimeType: string}
+     * @return array{data: string, mimeType: string}|null
      */
-    private function audio(array $payload): array
+    private function audio(array $payload): ?array
     {
         $outputAudio = $payload['output_audio'] ?? $payload['outputAudio'] ?? null;
-        if (is_array($outputAudio)) {
-            $data = isset($outputAudio['data']) ? (string) $outputAudio['data'] : '';
-            $decoded = base64_decode($data, strict: true);
-
-            return [
-                'data' => $decoded === false ? $data : $decoded,
-                'mimeType' => isset($outputAudio['mime_type'])
-                    ? (string) $outputAudio['mime_type']
-                    : (isset($outputAudio['mimeType']) ? (string) $outputAudio['mimeType'] : 'audio/wav'),
-            ];
+        if (! is_array($outputAudio) || ! is_string($outputAudio['data'] ?? null)) {
+            return null;
         }
 
-        return ['data' => '', 'mimeType' => 'audio/wav'];
+        $data = base64_decode($outputAudio['data'], strict: true);
+        if ($data === false || $data === '') {
+            return null;
+        }
+
+        return [
+            'data' => $data,
+            'mimeType' => (string) ($outputAudio['mime_type'] ?? $outputAudio['mimeType'] ?? 'audio/pcm'),
+        ];
     }
 
     /**

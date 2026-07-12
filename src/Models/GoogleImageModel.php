@@ -32,8 +32,8 @@ final class GoogleImageModel extends BaseModel implements ImageModelInterface
 
     public function generate(ImageRequest $request): ImageResponse
     {
-        $body = GoogleImageRequestBuilder::build($this->provider(), $request);
-        $url = Url::joinPath($this->options->baseUrl, "/models/{$this->modelId}:generateContent");
+        $body = GoogleImageRequestBuilder::build($this->provider(), $this->modelId, $request);
+        $url = Url::joinPath($this->options->baseUrl, '/interactions');
 
         $payload = $this->runner($this->options->sdk)
             ->postJson($url, $body, $this->options->authHeaders(), $this->provider());

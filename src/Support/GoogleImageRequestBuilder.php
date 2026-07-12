@@ -12,7 +12,7 @@ final class GoogleImageRequestBuilder
     /**
      * @return array<string, mixed>
      */
-    public static function build(string $providerName, ImageRequest $request): array
+    public static function build(string $providerName, string $modelId, ImageRequest $request): array
     {
         if ($request->count !== 1) {
             throw new InvalidArgumentException('Google image generation does not support the portable count() option. Run multiple requests or use provider-specific options when Google exposes multi-image output.');
@@ -22,28 +22,18 @@ final class GoogleImageRequestBuilder
             throw new InvalidArgumentException('Google image generation does not support the portable seed() option.');
         }
 
-        $generationConfig = [
-            'response_modalities' => ['TEXT', 'IMAGE'],
-        ];
-
-        $imageConfig = [];
+        $responseFormat = ['type' => 'image'];
         if ($request->aspectRatio !== null) {
-            $imageConfig['aspect_ratio'] = $request->aspectRatio;
+            $responseFormat['aspect_ratio'] = $request->aspectRatio;
         }
         if ($request->size !== null) {
-            $imageConfig['image_size'] = self::imageSize($request->size);
-        }
-        if ($imageConfig !== []) {
-            $generationConfig['image_config'] = $imageConfig;
+            $responseFormat['image_size'] = self::imageSize($request->size);
         }
 
         $body = [
-            'contents' => [[
-                'parts' => [
-                    ['text' => $request->prompt],
-                ],
-            ]],
-            'generation_config' => $generationConfig,
+            'model' => $modelId,
+            'input' => [['type' => 'text', 'text' => $request->prompt]],
+            'response_format' => $responseFormat,
         ];
 
         $raw = $request->providerOptionsFor($providerName)['raw'] ?? null;

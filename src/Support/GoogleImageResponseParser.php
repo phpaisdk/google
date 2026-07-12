@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AiSdk\Google\Support;
 
+use AiSdk\Exceptions\InvalidResponseException;
 use AiSdk\Responses\ImageResponse;
 use AiSdk\Results\ImageData;
 
@@ -16,18 +17,18 @@ final class GoogleImageResponseParser
     {
         $images = [];
 
-        foreach (self::parts($payload) as $part) {
-            $inlineData = $part['inlineData'] ?? $part['inline_data'] ?? null;
-            if (! is_array($inlineData) || ! is_string($inlineData['data'] ?? null)) {
-                continue;
-            }
-
+        $image = $payload['output_image'] ?? $payload['outputImage'] ?? null;
+        if (is_array($image) && is_string($image['data'] ?? null) && base64_decode($image['data'], strict: true) !== false) {
             $images[] = new ImageData(
-                base64: $inlineData['data'],
-                mimeType: is_string($inlineData['mimeType'] ?? null)
-                    ? $inlineData['mimeType']
-                    : (is_string($inlineData['mime_type'] ?? null) ? $inlineData['mime_type'] : 'image/png'),
+                base64: $image['data'],
+                mimeType: is_string($image['mime_type'] ?? null)
+                    ? $image['mime_type']
+                    : (is_string($image['mimeType'] ?? null) ? $image['mimeType'] : 'image/png'),
             );
+        }
+
+        if ($images === []) {
+            throw InvalidResponseException::forProvider($providerName, 'Google returned no generated image.', ['body' => $payload]);
         }
 
         return new ImageResponse(
@@ -36,28 +37,6 @@ final class GoogleImageResponseParser
             rawResponse: $payload,
             providerMetadata: [$providerName => self::metadata($payload)],
         );
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     * @return array<int, array<string, mixed>>
-     */
-    private static function parts(array $payload): array
-    {
-        $parts = [];
-        foreach (($payload['candidates'] ?? []) as $candidate) {
-            if (! is_array($candidate)) {
-                continue;
-            }
-
-            foreach (($candidate['content']['parts'] ?? []) as $part) {
-                if (is_array($part)) {
-                    $parts[] = $part;
-                }
-            }
-        }
-
-        return $parts;
     }
 
     /**
