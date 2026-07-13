@@ -122,6 +122,22 @@ $result = Generate::speech('Read this as a short dialogue.')
     ->run();
 ```
 
+## Transcription
+
+Gemini transcribes audio through its multimodal audio-understanding capability:
+
+```php
+use AiSdk\Content;
+use AiSdk\Generate;
+use AiSdk\Google;
+
+$result = Generate::transcription(Content::audio(__DIR__.'/meeting.mp3'))
+    ->model(Google::transcription('gemini-3.5-flash'))
+    ->run();
+
+echo $result->output->text;
+```
+
 ## Provider-Specific Options
 
 ## Video Generation
@@ -156,4 +172,5 @@ composer test
 ## Links
 
 - [Google Embeddings API](https://ai.google.dev/api/embeddings)
+- [Gemini Audio Understanding Guide](https://ai.google.dev/gemini-api/docs/audio)
 - [Core Package](https://github.com/phpaisdk/core)

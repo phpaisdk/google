@@ -13,15 +13,18 @@ use AiSdk\Contracts\SpeechModelInterface;
 use AiSdk\Contracts\SpeechProviderInterface;
 use AiSdk\Contracts\TextModelInterface;
 use AiSdk\Contracts\TextProviderInterface;
+use AiSdk\Contracts\TranscriptionModelInterface;
+use AiSdk\Contracts\TranscriptionProviderInterface;
 use AiSdk\Contracts\VideoModelInterface;
 use AiSdk\Contracts\VideoProviderInterface;
 use AiSdk\Google\Models\GoogleEmbeddingModel;
 use AiSdk\Google\Models\GoogleImageModel;
 use AiSdk\Google\Models\GoogleSpeechModel;
 use AiSdk\Google\Models\GoogleTextModel;
+use AiSdk\Google\Models\GoogleTranscriptionModel;
 use AiSdk\Google\Models\GoogleVideoModel;
 
-final class GoogleProvider extends BaseProvider implements EmbeddingProviderInterface, ImageProviderInterface, SpeechProviderInterface, TextProviderInterface, VideoProviderInterface
+final class GoogleProvider extends BaseProvider implements EmbeddingProviderInterface, ImageProviderInterface, SpeechProviderInterface, TextProviderInterface, TranscriptionProviderInterface, VideoProviderInterface
 {
     public function __construct(public readonly GoogleOptions $options) {}
 
@@ -43,6 +46,11 @@ final class GoogleProvider extends BaseProvider implements EmbeddingProviderInte
     public function speechModel(string $modelId): SpeechModelInterface
     {
         return new GoogleSpeechModel($modelId, $this->options);
+    }
+
+    public function transcriptionModel(string $modelId): TranscriptionModelInterface
+    {
+        return new GoogleTranscriptionModel($modelId, $this->options);
     }
 
     public function embeddingModel(string $modelId): EmbeddingModelInterface
