@@ -47,7 +47,7 @@ $result = Generate::embedding([
     'PHP is a programming language.',
     'Laravel is a PHP framework.',
 ])
-    ->model(Google::embedding('gemini-embedding-001'))
+    ->model(Google::model('gemini-embedding-001'))
     ->dimensions(768)
     ->providerOptions('google', [
         'embedContentConfig' => [
@@ -83,7 +83,7 @@ use AiSdk\Generate;
 use AiSdk\Google;
 
 $result = Generate::image()
-    ->model(Google::image('gemini-3.1-flash-image'))
+    ->model(Google::model('gemini-3.1-flash-image'))
     ->prompt('A clean app icon for a PHP AI SDK')
     ->aspectRatio('1:1')
     ->run();
@@ -98,7 +98,7 @@ use AiSdk\Generate;
 use AiSdk\Google;
 
 $result = Generate::speech()
-    ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+    ->model(Google::model('gemini-3.1-flash-tts-preview'))
     ->input('Say cheerfully: Have a wonderful day!')
     ->voice('Kore')
     ->run();
@@ -110,7 +110,7 @@ Google speech generation uses Gemini Interactions API audio responses. You can p
 
 ```php
 $result = Generate::speech('Read this as a short dialogue.')
-    ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+    ->model(Google::model('gemini-3.1-flash-tts-preview'))
     ->providerOptions('google', [
         'generation_config' => [
             'speech_config' => [
@@ -132,24 +132,117 @@ use AiSdk\Generate;
 use AiSdk\Google;
 
 $result = Generate::transcription(Content::audio(__DIR__.'/meeting.mp3'))
-    ->model(Google::transcription('gemini-3.5-flash'))
+    ->model(Google::model('gemini-3.5-flash'))
     ->run();
 
 echo $result->output->text;
 ```
 
-## Provider-Specific Options
+## Live voice and translation
 
-## Video Generation
+Install `aisdk/transport` when you want a ready-made WebSocket transport:
+
+```bash
+composer require aisdk/transport
+```
 
 ```php
-$result = Generate::video('A cinematic ocean scene')
-    ->model(Google::video('veo-3.1-generate-preview'))
-    ->aspectRatio('16:9')
-    ->resolution('1280x720')
-    ->duration(8)
-    ->run(timeout: 600);
+use AiSdk\Google;
+use AiSdk\Live;
+use AiSdk\Live\AudioDelta;
+use AiSdk\Live\TranscriptDelta;
+use AiSdk\Transport;
+
+$session = Live::voice()
+    ->model(Google::model('gemini-3.1-flash-live-preview'))
+    ->instructions('You are a concise customer-support agent.')
+    ->voice('Kore')
+    ->language('en-US')
+    ->connect(Transport::auto());
+
+// Send 16 kHz mono PCM chunks while reading events concurrently.
+$session->sendAudio($pcmBytes);
+
+foreach ($session->events() as $event) {
+    if ($event instanceof AudioDelta) {
+        playAudio($event->bytes);
+    }
+
+    if ($event instanceof TranscriptDelta) {
+        echo $event->delta;
+    }
+}
 ```
+
+`LiveSession` also supports text input, audio-stream completion, tool results,
+and explicit closure. Tools registered with `->tools([...])` are executed by
+core when they have a handler; unknown tool calls remain available as
+`ToolCallEvent` values.
+
+Provider-only setup fields, including session resumption, remain available
+without enlarging the portable API:
+
+```php
+->providerOptions('google', [
+    'raw' => ['sessionResumption' => ['handle' => $resumeHandle]],
+])
+```
+
+Gemini resumption updates and other unrecognized messages are preserved as
+`ProviderEvent` values.
+
+Gemini's dedicated Live Translate model has its own setup schema and accepts
+audio input only:
+
+```php
+$translator = Live::translate()
+    ->model(Google::model('gemini-3.5-live-translate-preview'))
+    ->from('en')
+    ->to('es')
+    ->connect(Transport::auto());
+
+$translator->sendAudio($pcmBytes);
+```
+
+Gemini Live does not expose a standalone streaming-transcription session.
+Voice and translation sessions still emit transcript events; use
+`Generate::transcription()` for a standalone transcription request.
+
+### Core-only transport
+
+`aisdk/transport` is optional. An application transport can implement
+`AiSdk\Live\Contracts\TransportInterface` and
+`TransportConnectionInterface`, then be passed to the same builder:
+
+```php
+$session = Live::voice()
+    ->model(Google::model('gemini-3.1-flash-live-preview'))
+    ->connect($appWebSocketTransport);
+```
+
+The [core custom-transport guide](https://github.com/phpaisdk/core#core-without-aisdktransport)
+contains the complete WebSocket implementation. Provider JSON remains in this
+package; the custom transport only sends and receives text or binary frames.
+
+### Browser credentials
+
+Create a constrained, short-lived Gemini token on your backend instead of
+exposing the API key in a browser:
+
+```php
+$secret = Live::voice()
+    ->model(Google::model('gemini-3.1-flash-live-preview'))
+    ->voice('Kore')
+    ->clientSecret();
+
+return ['token' => $secret->value, 'expires_at' => $secret->expiresAt];
+```
+
+The browser uses that token with Gemini's constrained `v1alpha` Live WebSocket.
+Gemini Live currently uses WebSockets; this package does not advertise a PHP
+WebRTC or SIP lifecycle for Google.
+
+## Provider-Specific Options
 
 ```php
 $result = Generate::text('Hello')
@@ -163,14 +256,31 @@ $result = Generate::text('Hello')
     ->run();
 ```
 
+## Video Generation
+
+```php
+$result = Generate::video('A cinematic ocean scene')
+    ->model(Google::model('veo-3.1-generate-preview'))
+    ->aspectRatio('16:9')
+    ->resolution('1280x720')
+    ->duration(8)
+    ->run(timeout: 600);
+```
+
 ## Testing
 
 ```bash
 composer test
 ```
 
+The default suite uses protocol fixtures and conformance checks. Credentialed
+Live network verification is separate from the default test run.
+
 ## Links
 
 - [Google Embeddings API](https://ai.google.dev/api/embeddings)
 - [Gemini Audio Understanding Guide](https://ai.google.dev/gemini-api/docs/audio)
+- [Gemini Live API](https://ai.google.dev/gemini-api/docs/live-api)
+- [Gemini Live Translate](https://ai.google.dev/gemini-api/docs/live-api/live-translate)
+- [Gemini ephemeral tokens](https://ai.google.dev/gemini-api/docs/live-api/ephemeral-tokens)
 - [Core Package](https://github.com/phpaisdk/core)

@@ -38,7 +38,7 @@ it('sends image generation to the Gemini interactions endpoint using the documen
     configureGoogleMediaWith($client);
 
     $result = Generate::image('A tiny banana spaceship')
-        ->model(Google::image('gemini-3.1-flash-image'))
+        ->model(Google::model('gemini-3.1-flash-image'))
         ->aspectRatio('16:9')
         ->size('2048x2048')
         ->run();
@@ -63,7 +63,7 @@ it('fails image generation when Gemini returns no output image data', function (
     configureGoogleMediaWith($client);
 
     expect(fn () => Generate::image('A tiny banana spaceship')
-        ->model(Google::image('gemini-3.1-flash-image'))
+        ->model(Google::model('gemini-3.1-flash-image'))
         ->run())
         ->toThrow(InvalidResponseException::class, 'Google returned no generated image.');
 });
@@ -75,7 +75,7 @@ it('fails image generation when Gemini returns malformed output image data', fun
     configureGoogleMediaWith($client);
 
     expect(fn () => Generate::image('A tiny banana spaceship')
-        ->model(Google::image('gemini-3.1-flash-image'))
+        ->model(Google::model('gemini-3.1-flash-image'))
         ->run())
         ->toThrow(InvalidResponseException::class, 'Google returned no generated image.');
 });
@@ -90,7 +90,7 @@ it('sends speech generation to the Gemini interactions endpoint and parses outpu
     configureGoogleMediaWith($client);
 
     $result = Generate::speech('Welcome')
-        ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+        ->model(Google::model('gemini-3.1-flash-tts-preview'))
         ->voice('Kore')
         ->run();
 
@@ -116,7 +116,7 @@ it('fails speech generation when Gemini returns malformed output audio', functio
     configureGoogleMediaWith($client);
 
     expect(fn () => Generate::speech('Welcome')
-        ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+        ->model(Google::model('gemini-3.1-flash-tts-preview'))
         ->run())
         ->toThrow(InvalidResponseException::class, 'Google returned no generated audio.');
 });

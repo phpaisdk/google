@@ -65,4 +65,11 @@ final class GoogleOptions
     {
         return array_merge(['x-goog-api-key' => $this->apiKey], $this->headers);
     }
+
+    public function liveAuthTokenUrl(): string
+    {
+        $baseUrl = preg_replace('#/v1(?:alpha|beta)?$#', '', $this->baseUrl);
+
+        return ($baseUrl ?? $this->baseUrl).'/v1alpha/auth_tokens';
+    }
 }

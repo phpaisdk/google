@@ -32,7 +32,7 @@ it('generates a Google embedding with the current embed content schema', functio
     Google::create(['apiKey' => 'gemini-test']);
 
     $result = Generate::embedding('PHP is a programming language.')
-        ->model(Google::embedding('gemini-embedding-001'))
+        ->model(Google::model('gemini-embedding-001'))
         ->dimensions(768)
         ->providerOptions('google', [
             'embedContentConfig' => [
@@ -75,7 +75,7 @@ it('generates Google embeddings in one batch request', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
     $result = Generate::embedding(['First document', 'Second document'])
-        ->model(Google::embedding('models/gemini-embedding-001'))
+        ->model(Google::model('models/gemini-embedding-001'))
         ->run();
 
     expect($result->embeddings[0]->vector)->toBe([0.1, 0.2])
@@ -99,5 +99,5 @@ it('generates Google embeddings in one batch request', function () {
 it('accepts opaque Google embedding model ids', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
-    expect(Google::embedding('future-embedding-model')->modelId())->toBe('future-embedding-model');
+    expect(Google::model('future-embedding-model')->modelId())->toBe('future-embedding-model');
 });

@@ -83,7 +83,7 @@ it('generates images through the Google vertical', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
     $result = Generate::image()
-        ->model(Google::image('gemini-3.1-flash-image'))
+        ->model(Google::model('gemini-3.1-flash-image'))
         ->prompt('A tiny banana spaceship')
         ->aspectRatio('16:9')
         ->size('2048x2048')
@@ -117,7 +117,7 @@ it('generates speech through the Google vertical', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
     $result = Generate::speech()
-        ->model(Google::speech('gemini-3.1-flash-tts-preview'))
+        ->model(Google::model('gemini-3.1-flash-tts-preview'))
         ->input('Say cheerfully: Have a wonderful day!')
         ->voice('Kore')
         ->run();
@@ -159,6 +159,6 @@ it('accepts opaque model ids for every implemented modality', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
     expect(Google::model('future-text-model')->modelId())->toBe('future-text-model')
-        ->and(Google::image('future-image-model')->modelId())->toBe('future-image-model')
-        ->and(Google::speech('future-speech-model')->modelId())->toBe('future-speech-model');
+        ->and(Google::model('future-image-model')->modelId())->toBe('future-image-model')
+        ->and(Google::model('future-speech-model')->modelId())->toBe('future-speech-model');
 });

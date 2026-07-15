@@ -21,7 +21,7 @@ it('transcribes through Gemini audio understanding', function () {
     Google::create(['apiKey' => 'google-test']);
 
     $result = Generate::transcription(Content::audio('wav-bytes', 'audio/wav', 'clip.wav'))
-        ->model(Google::transcription('gemini-2.5-flash'))
+        ->model(Google::model('gemini-2.5-flash'))
         ->run();
 
     $body = $client->sentBody();
