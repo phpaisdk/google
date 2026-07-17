@@ -284,11 +284,13 @@ composer test
 The default suite uses protocol fixtures and conformance checks. Credentialed
 Live network verification is separate from the default test run.
 
-## Links
+## Documentation
 
-- [Google Embeddings API](https://ai.google.dev/api/embeddings)
-- [Gemini Audio Understanding Guide](https://ai.google.dev/gemini-api/docs/audio)
-- [Gemini Live API](https://ai.google.dev/gemini-api/docs/live-api)
-- [Gemini Live Translate](https://ai.google.dev/gemini-api/docs/live-api/live-translate)
-- [Gemini ephemeral tokens](https://ai.google.dev/gemini-api/docs/live-api/ephemeral-tokens)
-- [Core Package](https://github.com/phpaisdk/core)
+- [PHP AI SDK documentation](https://phpaisdk.com/docs)
+- [Google documentation](https://phpaisdk.com/docs/google)
+
+## Community
+
+- [Contributing](https://github.com/phpaisdk/.github/blob/main/CONTRIBUTING.md)
+- [Support](https://github.com/phpaisdk/.github/blob/main/SUPPORT.md)
+- For private security reports, email [security@phpaisdk.com](mailto:security@phpaisdk.com).
