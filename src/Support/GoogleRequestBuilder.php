@@ -10,6 +10,8 @@ use AiSdk\Exceptions\InvalidArgumentException;
 use AiSdk\Message;
 use AiSdk\Outputs\Output;
 use AiSdk\Requests\TextModelRequest;
+use AiSdk\Tool;
+use AiSdk\ToolChoice;
 
 final class GoogleRequestBuilder
 {
@@ -35,6 +37,10 @@ final class GoogleRequestBuilder
             $generationConfig = array_replace($generationConfig, self::responseFormat($request->output));
         }
 
+        if ($request->tools !== []) {
+            $generationConfig['tool_choice'] = self::toolChoice($request->toolChoice);
+        }
+
         $body = [
             'model' => $modelId,
             'input' => self::input($request->messages),
@@ -45,16 +51,15 @@ final class GoogleRequestBuilder
             $body['system_instruction'] = $request->system;
         }
 
+        if ($request->tools !== []) {
+            $body['tools'] = array_map(self::tool(...), $request->tools);
+        }
+
         if ($stream) {
             $body['stream'] = true;
         }
 
-        $raw = $request->providerOptionsFor($providerName)['raw'] ?? null;
-        if (is_array($raw)) {
-            $body = array_replace($body, $raw);
-        }
-
-        return $body;
+        return self::mergeOptions($body, $request->providerOptionsFor($providerName));
     }
 
     /**
@@ -71,6 +76,21 @@ final class GoogleRequestBuilder
         }
 
         return array_map(self::messageStep(...), $messages);
+    }
+
+    /**
+     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    private static function mergeOptions(array $body, array $options): array
+    {
+        $raw = $options['raw'] ?? null;
+        unset($options['raw']);
+
+        $body = array_replace($body, $options);
+
+        return is_array($raw) ? array_replace($body, $raw) : $body;
     }
 
     /**
@@ -165,5 +185,35 @@ final class GoogleRequestBuilder
         }
 
         return [];
+    }
+
+    /** @return array<string, mixed> */
+    private static function tool(Tool $tool): array
+    {
+        return [
+            'type' => 'function',
+            'name' => $tool->name(),
+            'description' => $tool->description(),
+            'parameters' => $tool->inputSchemaForProvider(),
+        ];
+    }
+
+    /** @return string|array<string, array{mode: string, tools?: array<int, string>}> */
+    private static function toolChoice(?ToolChoice $choice): string|array
+    {
+        if ($choice === null) {
+            return ToolChoice::AUTO;
+        }
+
+        if ($choice->type !== ToolChoice::TOOL) {
+            return $choice->type === ToolChoice::REQUIRED ? 'any' : $choice->type;
+        }
+
+        return [
+            'allowed_tools' => [
+                'mode' => 'any',
+                'tools' => [(string) $choice->toolName],
+            ],
+        ];
     }
 }

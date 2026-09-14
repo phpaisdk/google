@@ -6,7 +6,10 @@ use AiSdk\Generate;
 use AiSdk\Google;
 use AiSdk\Google\Tests\Fakes\FakeHttpClient;
 use AiSdk\Reasoning;
+use AiSdk\Schema;
 use AiSdk\Support\Sdk;
+use AiSdk\Tool;
+use AiSdk\ToolChoice;
 use Nyholm\Psr7\Factory\Psr17Factory;
 
 afterEach(function () {
@@ -67,6 +70,55 @@ it('normalizes camel case text usage fields', function () {
     expect($result->usage->inputTokens)->toBe(14)
         ->and($result->usage->outputTokens)->toBe(7)
         ->and($result->usage->totalTokens)->toBe(21);
+});
+
+it('sends direct provider options', function () {
+    $client = new FakeHttpClient(200, json_encode([
+        'output_text' => 'Done',
+        'finish_reason' => 'stop',
+    ]));
+    configureGoogleWith($client);
+    Google::create(['apiKey' => 'gemini-test']);
+
+    Generate::text('Hi')
+        ->model(Google::model('gemini-3.5-flash'))
+        ->providerOptions('google', ['safety_settings' => ['mode' => 'strict']])
+        ->run();
+
+    expect($client->sentBody()['safety_settings'])->toBe(['mode' => 'strict']);
+});
+
+it('serializes function tools and tool choice for interactions', function () {
+    $client = new FakeHttpClient(200, json_encode([
+        'id' => 'interaction_google',
+        'finish_reason' => 'stop',
+        'output_text' => 'Done',
+    ]));
+    configureGoogleWith($client);
+    Google::create(['apiKey' => 'gemini-test']);
+
+    Generate::text('Check the weather')
+        ->model(Google::model('gemini-3.5-flash'))
+        ->tool(Tool::make('weather', 'Get the weather')->input(Schema::string('city')->required()))
+        ->toolChoice(ToolChoice::tool('weather'))
+        ->run();
+
+    expect($client->sentBody()['tools'])->toBe([[
+        'type' => 'function',
+        'name' => 'weather',
+        'description' => 'Get the weather',
+        'parameters' => [
+            'type' => 'object',
+            'title' => 'weather_input',
+            'properties' => [
+                'city' => ['type' => 'string', 'title' => 'city'],
+            ],
+            'required' => ['city'],
+            'additionalProperties' => false,
+        ],
+    ]])->and($client->sentBody()['generation_config']['tool_choice'])->toBe([
+        'allowed_tools' => ['mode' => 'any', 'tools' => ['weather']],
+    ]);
 });
 
 it('generates images through the Google vertical', function () {
