@@ -39,7 +39,7 @@ it('generates text end to end through the Google vertical', function () {
 
     Google::create(['apiKey' => 'gemini-test']);
 
-    $result = Generate::text('Hi')->model(Google::model('gemini-3.5-flash'))->run();
+    $result = Generate::text('Hi')->model(Google::model('gemini-3.5-flash'))->maxTokens(1024)->run();
 
     expect($result->text)->toBe('Hello from Gemini')
         ->and($result->usage->inputTokens)->toBe(6)

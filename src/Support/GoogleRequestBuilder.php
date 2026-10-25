@@ -20,10 +20,15 @@ final class GoogleRequestBuilder
      */
     public static function build(string $modelId, string $providerName, TextModelRequest $request, bool $stream): array
     {
-        $generationConfig = [
-            'max_output_tokens' => $request->maxTokens,
-            'temperature' => $request->temperature,
-        ];
+        $generationConfig = [];
+
+        if ($request->maxTokens !== null) {
+            $generationConfig['max_output_tokens'] = $request->maxTokens;
+        }
+
+        if ($request->temperature !== null) {
+            $generationConfig['temperature'] = $request->temperature;
+        }
 
         if ($request->topP !== null) {
             $generationConfig['top_p'] = $request->topP;
