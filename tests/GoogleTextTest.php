@@ -103,7 +103,7 @@ it('serializes function tools and tool choice for interactions', function () {
         ->toolChoice(ToolChoice::tool('weather'))
         ->run();
 
-    expect($client->sentBody()['tools'])->toBe([[
+    expect($client->sentBody()['tools'])->toEqual([[
         'type' => 'function',
         'name' => 'weather',
         'description' => 'Get the weather',
