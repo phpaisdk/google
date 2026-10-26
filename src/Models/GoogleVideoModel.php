@@ -44,9 +44,9 @@ final class GoogleVideoModel extends BaseModel implements VideoModelInterface
             }$instance['image'] = ['inlineData' => ['mimeType' => $r->image->mimeType() ?? 'image/png', 'data' => $r->image->base64Data()]];
         }if (is_array($o['referenceImages'] ?? null)) {
             $instance['referenceImages'] = $o['referenceImages'];
-        }$params = array_filter(['aspectRatio' => $r->output?->aspectRatio, 'resolution' => $this->resolution($r->output?->resolution), 'durationSeconds' => $r->output?->duration, 'seed' => $r->output?->seed], fn ($v) => $v !== null);
+        }$params = array_filter(['aspectRatio' => $r->output?->aspectRatio, 'resolution' => $this->resolution($r->output?->resolution), 'durationSeconds' => $r->output?->duration, 'seed' => $r->output?->seed], fn($v) => $v !== null);
         $params = array_replace($params, array_diff_key($o, array_flip(['pollIntervalMs', 'pollTimeoutMs', 'referenceImages'])));
-        $p = $this->runner($this->options->sdk)->postJson(Url::joinPath($this->options->baseUrl, '/models/'.rawurlencode($this->modelId).':predictLongRunning'), ['instances' => [$instance], 'parameters' => $params], $this->options->authHeaders(), $this->provider());
+        $p = $this->runner($this->options->sdk)->postJson(Url::joinPath($this->options->baseUrl, '/models/' . rawurlencode($this->modelId) . ':predictLongRunning'), ['instances' => [$instance], 'parameters' => $params], $this->options->authHeaders(), $this->provider());
         $id = $p['name'] ?? null;
         if (! is_string($id) || $id === '') {
             throw InvalidResponseException::forProvider($this->provider(), 'Google returned no video operation name.', ['body' => $p]);
@@ -57,7 +57,7 @@ final class GoogleVideoModel extends BaseModel implements VideoModelInterface
 
     public function poll(VideoJob $job): VideoJob
     {
-        $p = $this->runner($this->options->sdk)->getJson(Url::joinPath($this->options->baseUrl, '/'.$job->id), $this->options->authHeaders(), $this->provider());
+        $p = $this->runner($this->options->sdk)->getJson(Url::joinPath($this->options->baseUrl, '/' . $job->id), $this->options->authHeaders(), $this->provider());
         if (! ($p['done'] ?? false)) {
             return new VideoJob($job->id, $job->provider, $job->modelId, VideoJobStatus::Running, rawResponse: $p, providerMetadata: $job->providerMetadata);
         }if (isset($p['error'])) {
@@ -65,7 +65,7 @@ final class GoogleVideoModel extends BaseModel implements VideoModelInterface
         }$uri = $p['response']['generateVideoResponse']['generatedSamples'][0]['video']['uri'] ?? null;
         if (! is_string($uri) || $uri === '') {
             return new VideoJob($job->id, $job->provider, $job->modelId, VideoJobStatus::Failed, errorMessage: 'Google completed without a video URI.', rawResponse: $p, providerMetadata: $job->providerMetadata);
-        }$url = $uri.(str_contains($uri, '?') ? '&' : '?').'key='.rawurlencode($this->options->apiKey);
+        }$url = $uri . (str_contains($uri, '?') ? '&' : '?') . 'key=' . rawurlencode($this->options->apiKey);
 
         return new VideoJob($job->id, $job->provider, $job->modelId, VideoJobStatus::Succeeded, new VideoData(url: $url), usage: Usage::empty(), rawResponse: $p, providerMetadata: $job->providerMetadata);
     }
@@ -73,7 +73,7 @@ final class GoogleVideoModel extends BaseModel implements VideoModelInterface
     private function resolution(?string $r): ?string
     {
         return match ($r) {
-            '1280x720' => '720p','1920x1080' => '1080p','3840x2160' => '4k',default => $r
+            '1280x720' => '720p','1920x1080' => '1080p','3840x2160' => '4k',default => $r,
         };
     }
 }

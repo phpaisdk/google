@@ -13,7 +13,7 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 
 function googleVideoOptions(FakeHttpClient $client): GoogleOptions
 {
-    $f = new Psr17Factory;
+    $f = new Psr17Factory();
 
     return new GoogleOptions('key', 'https://generativelanguage.googleapis.com/v1beta', sdk: new Sdk($client, $f, $f));
 }

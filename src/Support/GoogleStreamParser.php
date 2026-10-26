@@ -87,7 +87,7 @@ final class GoogleStreamParser
             $index = $toolIndex++;
             $id = (string) ($delta['id'] ?? $delta['call_id'] ?? "call_{$index}");
             $name = (string) ($delta['name'] ?? '');
-            $args = json_encode($delta['args'] ?? new \stdClass, JSON_THROW_ON_ERROR);
+            $args = json_encode($delta['args'] ?? new \stdClass(), JSON_THROW_ON_ERROR);
 
             $finishReason = FinishReason::ToolCalls;
             yield new ToolCallStartPart($index, $id, $name);

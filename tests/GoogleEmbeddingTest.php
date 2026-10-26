@@ -15,7 +15,7 @@ afterEach(function () {
 
 function configureGoogleEmbeddingsWith(FakeHttpClient $client): void
 {
-    $factory = new Psr17Factory;
+    $factory = new Psr17Factory();
     Generate::configure(new Sdk(
         httpClient: $client,
         requestFactory: $factory,

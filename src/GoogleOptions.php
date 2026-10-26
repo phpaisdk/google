@@ -70,6 +70,6 @@ final class GoogleOptions
     {
         $baseUrl = preg_replace('#/v1(?:alpha|beta)?$#', '', $this->baseUrl);
 
-        return ($baseUrl ?? $this->baseUrl).'/v1alpha/auth_tokens';
+        return ($baseUrl ?? $this->baseUrl) . '/v1alpha/auth_tokens';
     }
 }

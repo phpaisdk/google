@@ -35,7 +35,7 @@ final class GoogleEmbeddingModel extends BaseModel implements EmbeddingModelInte
     {
         $model = $this->modelResourceName();
         $requests = array_map(
-            fn (string $input): array => $this->buildRequest($model, $input, $request),
+            fn(string $input): array => $this->buildRequest($model, $input, $request),
             $request->inputs,
         );
 
@@ -76,7 +76,7 @@ final class GoogleEmbeddingModel extends BaseModel implements EmbeddingModelInte
                 $this->provider() => array_filter([
                     'model' => $this->modelId,
                     'usageMetadata' => is_array($usageMetadata) ? $usageMetadata : null,
-                ], static fn (mixed $value): bool => $value !== null),
+                ], static fn(mixed $value): bool => $value !== null),
             ],
         );
     }
@@ -99,7 +99,7 @@ final class GoogleEmbeddingModel extends BaseModel implements EmbeddingModelInte
         $providerConfig = $options['embedContentConfig'] ?? null;
         $config = array_filter([
             'outputDimensionality' => $request->dimensions,
-        ], static fn (mixed $value): bool => $value !== null);
+        ], static fn(mixed $value): bool => $value !== null);
 
         if (is_array($providerConfig)) {
             $config = array_replace_recursive($config, $providerConfig);

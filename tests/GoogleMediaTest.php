@@ -16,7 +16,7 @@ afterEach(function () {
 
 function configureGoogleMediaWith(FakeHttpClient $client): void
 {
-    $factory = new Psr17Factory;
+    $factory = new Psr17Factory();
     Generate::configure(new Sdk(
         httpClient: $client,
         requestFactory: $factory,
@@ -62,7 +62,7 @@ it('fails image generation when Gemini returns no output image data', function (
     ]));
     configureGoogleMediaWith($client);
 
-    expect(fn () => Generate::image('A tiny banana spaceship')
+    expect(fn() => Generate::image('A tiny banana spaceship')
         ->model(Google::model('gemini-3.1-flash-image'))
         ->run())
         ->toThrow(InvalidResponseException::class, 'Google returned no generated image.');
@@ -74,7 +74,7 @@ it('fails image generation when Gemini returns malformed output image data', fun
     ]));
     configureGoogleMediaWith($client);
 
-    expect(fn () => Generate::image('A tiny banana spaceship')
+    expect(fn() => Generate::image('A tiny banana spaceship')
         ->model(Google::model('gemini-3.1-flash-image'))
         ->run())
         ->toThrow(InvalidResponseException::class, 'Google returned no generated image.');
@@ -115,7 +115,7 @@ it('fails speech generation when Gemini returns malformed output audio', functio
     ]));
     configureGoogleMediaWith($client);
 
-    expect(fn () => Generate::speech('Welcome')
+    expect(fn() => Generate::speech('Welcome')
         ->model(Google::model('gemini-3.1-flash-tts-preview'))
         ->run())
         ->toThrow(InvalidResponseException::class, 'Google returned no generated audio.');

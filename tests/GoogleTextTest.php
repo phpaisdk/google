@@ -19,7 +19,7 @@ afterEach(function () {
 
 function configureGoogleWith(FakeHttpClient $client): void
 {
-    $factory = new Psr17Factory;
+    $factory = new Psr17Factory();
     Generate::configure(new Sdk(
         httpClient: $client,
         requestFactory: $factory,

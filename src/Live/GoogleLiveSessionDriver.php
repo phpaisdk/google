@@ -61,7 +61,7 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
         $setup = GoogleLiveConfiguration::setup($modelId, $request);
         $this->validateAudioFormats();
         $endpoint = new WebSocketEndpoint(
-            self::ENDPOINT.'?key='.rawurlencode($options->apiKey),
+            self::ENDPOINT . '?key=' . rawurlencode($options->apiKey),
             $options->headers,
         );
 
@@ -80,7 +80,7 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
     public function sendAudio(string $bytes): void
     {
         if ($this->usesManualActivityDetection() && ! $this->activityStarted) {
-            $this->sendJson(['realtimeInput' => ['activityStart' => new \stdClass]]);
+            $this->sendJson(['realtimeInput' => ['activityStart' => new \stdClass()]]);
             $this->activityStarted = true;
         }
 
@@ -110,7 +110,7 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
                 throw new InvalidArgumentException('Gemini Live cannot end manual activity before any activity has started.');
             }
 
-            $this->sendJson(['realtimeInput' => ['activityEnd' => new \stdClass]]);
+            $this->sendJson(['realtimeInput' => ['activityEnd' => new \stdClass()]]);
             $this->activityStarted = false;
 
             return;
@@ -186,7 +186,7 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
         while (! $this->connection->isClosed()) {
             $frame = $this->connection->receive();
             if ($frame === null) {
-                yield new LiveClosed;
+                yield new LiveClosed();
 
                 break;
             }
@@ -334,11 +334,11 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
             }
 
             if (($serverContent['interrupted'] ?? false) === true) {
-                yield new Interrupted;
+                yield new Interrupted();
             }
 
             if (($serverContent['turnComplete'] ?? false) === true) {
-                yield new ResponseCompleted;
+                yield new ResponseCompleted();
             }
         }
 
@@ -363,8 +363,8 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
             }
 
             if ($normalizedCalls !== []) {
-                $groupId = 'tool-group-'.(++$this->toolGroupSequence);
-                $order = array_map(static fn (array $call): string => $call[0], $normalizedCalls);
+                $groupId = 'tool-group-' . (++$this->toolGroupSequence);
+                $order = array_map(static fn(array $call): string => $call[0], $normalizedCalls);
                 $this->toolGroups[$groupId] = [
                     'order' => $order,
                     'remaining' => array_fill_keys($order, true),
@@ -380,7 +380,7 @@ final class GoogleLiveSessionDriver implements LiveSessionDriverInterface
 
         $usage = $payload['usageMetadata'] ?? null;
         if (is_array($usage)) {
-            $numeric = array_filter($usage, static fn (mixed $value): bool => is_int($value) || is_float($value));
+            $numeric = array_filter($usage, static fn(mixed $value): bool => is_int($value) || is_float($value));
             if ($numeric !== []) {
                 yield new UsageEvent($numeric);
             }

@@ -24,12 +24,12 @@ final class GoogleLiveConfiguration
         }
 
         $setup = [
-            'model' => 'models/'.$modelId,
+            'model' => 'models/' . $modelId,
             'generationConfig' => [
                 'responseModalities' => ['AUDIO'],
             ],
-            'inputAudioTranscription' => new \stdClass,
-            'outputAudioTranscription' => new \stdClass,
+            'inputAudioTranscription' => new \stdClass(),
+            'outputAudioTranscription' => new \stdClass(),
         ];
 
         $instructions = $request->options['instructions'] ?? null;
@@ -58,7 +58,7 @@ final class GoogleLiveConfiguration
         if ($request->tools !== []) {
             $setup['tools'] = [[
                 'functionDeclarations' => array_map(
-                    static fn (Tool $tool): array => [
+                    static fn(Tool $tool): array => [
                         'name' => $tool->name(),
                         'description' => $tool->description(),
                         'parameters' => $tool->inputSchemaForProvider(),
@@ -76,8 +76,8 @@ final class GoogleLiveConfiguration
 
             $provider = $request->providerOptions[GoogleOptions::PROVIDER_NAME] ?? [];
             $echo = $provider['echoTargetLanguage'] ?? $provider['echo_target_language'] ?? false;
-            $setup['generationConfig']['inputAudioTranscription'] = new \stdClass;
-            $setup['generationConfig']['outputAudioTranscription'] = new \stdClass;
+            $setup['generationConfig']['inputAudioTranscription'] = new \stdClass();
+            $setup['generationConfig']['outputAudioTranscription'] = new \stdClass();
             $setup['generationConfig']['translationConfig'] = [
                 'targetLanguageCode' => $target,
                 'echoTargetLanguage' => (bool) $echo,

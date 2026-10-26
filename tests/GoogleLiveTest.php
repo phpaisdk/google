@@ -82,9 +82,9 @@ it('runs Gemini voice sessions over the core transport contract', function () {
         ->and($transport->connection->sentJson(3)['realtimeInput']['audioStreamEnd'])->toBeTrue();
 
     $events = iterator_to_array($session->events());
-    $classes = array_map(static fn (object $event): string => $event::class, $events);
+    $classes = array_map(static fn(object $event): string => $event::class, $events);
     expect($classes)->toContain(TranscriptDelta::class, TextDelta::class, AudioDelta::class, ResponseCompleted::class, ToolCallEvent::class, ProviderEvent::class, LiveClosed::class);
-    $transcript = array_values(array_filter($events, static fn (object $event): bool => $event instanceof TranscriptDelta))[0];
+    $transcript = array_values(array_filter($events, static fn(object $event): bool => $event instanceof TranscriptDelta))[0];
     expect($transcript->source)->toBe(TranscriptSource::Input);
 
     $session->sendToolResult('call-1', ['temperature' => 31]);
@@ -94,7 +94,7 @@ it('runs Gemini voice sessions over the core transport contract', function () {
 
 it('uses the dedicated Gemini Live Translate setup and audio-only input', function () {
     Google::create(['apiKey' => 'gemini-test']);
-    $transport = new FakeLiveTransport;
+    $transport = new FakeLiveTransport();
 
     $session = Live::translate()
         ->model(Google::model('gemini-3.5-live-translate-preview'))
@@ -113,7 +113,7 @@ it('uses the dedicated Gemini Live Translate setup and audio-only input', functi
     $session->sendAudio('audio');
     expect($transport->connection->sentJson(1)['realtimeInput']['audio']['data'])->toBe(base64_encode('audio'));
 
-    expect(fn () => $session->sendText('not supported'))
+    expect(fn() => $session->sendText('not supported'))
         ->toThrow(InvalidArgumentException::class, 'accepts audio input only');
 });
 
@@ -122,7 +122,7 @@ it('creates constrained Gemini Live ephemeral tokens', function () {
         'name' => 'auth_tokens/ephemeral-token',
         'expireTime' => '2030-01-01T00:00:00Z',
     ]));
-    $factory = new Psr17Factory;
+    $factory = new Psr17Factory();
     Generate::configure(new Sdk($client, $factory, $factory));
     Google::create(['apiKey' => 'gemini-test']);
 
@@ -145,7 +145,7 @@ it('creates constrained Gemini Live ephemeral tokens', function () {
 
 it('locks dedicated Live Translate settings into ephemeral tokens', function () {
     $client = new FakeHttpClient(200, json_encode(['name' => 'auth_tokens/translate-token']));
-    $factory = new Psr17Factory;
+    $factory = new Psr17Factory();
     Generate::configure(new Sdk($client, $factory, $factory));
     Google::create(['apiKey' => 'gemini-test']);
 
@@ -176,15 +176,15 @@ it('locks dedicated Live Translate settings into ephemeral tokens', function () 
 it('does not expose ordinary Gemini Live as standalone streaming transcription', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
-    expect(fn () => Live::transcribe()
+    expect(fn() => Live::transcribe()
         ->model(Google::model('gemini-3.1-flash-live-preview'))
-        ->connect(new FakeLiveTransport))
+        ->connect(new FakeLiveTransport()))
         ->toThrow(InvalidArgumentException::class, 'does not provide a standalone transcription session');
 });
 
 it('maps commit to Gemini manual activity boundaries when automatic VAD is disabled', function () {
     Google::create(['apiKey' => 'gemini-test']);
-    $transport = new FakeLiveTransport;
+    $transport = new FakeLiveTransport();
     $session = Live::voice()
         ->model(Google::model('gemini-3.1-flash-live-preview'))
         ->turnDetection('disabled')
@@ -203,7 +203,7 @@ it('maps commit to Gemini manual activity boundaries when automatic VAD is disab
 it('waits for setupComplete before returning a Gemini Live session', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
-    expect(fn () => Live::voice()
+    expect(fn() => Live::voice()
         ->model(Google::model('gemini-3.1-flash-live-preview'))
         ->connect(new FakeLiveTransport([], false)))
         ->toThrow(InvalidResponseException::class, 'closed before acknowledging');
@@ -223,8 +223,8 @@ it('returns parallel Gemini tool calls in one protocol response', function () {
     $session = Live::voice()
         ->model(Google::model('gemini-3.1-flash-live-preview'))
         ->tools([
-            Tool::make('weather')->input(Schema::string('city')->required())->run(fn (string $city): string => "Sunny in {$city}"),
-            Tool::make('time')->input(Schema::string('city')->required())->run(fn (string $city): string => "12:00 in {$city}"),
+            Tool::make('weather')->input(Schema::string('city')->required())->run(fn(string $city): string => "Sunny in {$city}"),
+            Tool::make('time')->input(Schema::string('city')->required())->run(fn(string $city): string => "12:00 in {$city}"),
         ])
         ->connect($transport);
 
@@ -248,16 +248,16 @@ it('returns parallel Gemini tool calls in one protocol response', function () {
 it('rejects audio formats that Gemini Live cannot carry', function () {
     Google::create(['apiKey' => 'gemini-test']);
 
-    expect(fn () => Live::voice()
+    expect(fn() => Live::voice()
         ->model(Google::model('gemini-3.1-flash-live-preview'))
         ->inputAudioFormat('mp3')
-        ->connect(new FakeLiveTransport))
+        ->connect(new FakeLiveTransport()))
         ->toThrow(InvalidArgumentException::class, 'requires raw little-endian 16-bit mono PCM input');
 });
 
 it('preserves supported PCM input sample rates in Gemini audio frames', function () {
     Google::create(['apiKey' => 'gemini-test']);
-    $transport = new FakeLiveTransport;
+    $transport = new FakeLiveTransport();
     $session = Live::voice()
         ->model(Google::model('gemini-3.1-flash-live-preview'))
         ->inputAudioFormat('audio/pcm;rate=48000')

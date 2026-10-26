@@ -16,7 +16,7 @@ afterEach(function () {
 
 it('transcribes through Gemini audio understanding', function () {
     $client = new FakeHttpClient(200, '{"output_text":"Gemini transcript.","usage":{"input_tokens":8,"output_tokens":3}}');
-    $factory = new Psr17Factory;
+    $factory = new Psr17Factory();
     Generate::configure(new Sdk($client, $factory, $factory));
     Google::create(['apiKey' => 'google-test']);
 
