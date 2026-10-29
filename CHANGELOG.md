@@ -2,7 +2,7 @@
 
 Notable changes to `aisdk/google`. Release notes are also published at https://github.com/phpaisdk/google/releases.
 
-## Unreleased (v0.10.1)
+## v0.10.1 — 2026-10-29
 
 - Successful responses that carry no output raise `InvalidResponseException`.
 
