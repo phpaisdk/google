@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AiSdk\Google\Support;
 
+use AiSdk\Exceptions\InvalidResponseException;
 use AiSdk\FinishReason;
 use AiSdk\Responses\Parts\ReasoningPart;
 use AiSdk\Responses\Parts\TextPart;
@@ -18,8 +19,15 @@ final class GoogleResponseParser
      */
     public static function parse(array $payload): TextModelResponse
     {
-        $parts = [];
         $outputText = $payload['output_text'] ?? $payload['outputText'] ?? null;
+
+        if (! is_string($outputText) && ! is_array($payload['steps'] ?? null)) {
+            $error = is_array($payload['error'] ?? null) ? ($payload['error']['message'] ?? null) : null;
+
+            throw InvalidResponseException::forProvider('google', 'Google returned an unexpected response' . (is_string($error) ? ': ' . $error : ' without output.'));
+        }
+
+        $parts = [];
 
         if (is_string($outputText) && $outputText !== '') {
             $parts[] = new TextPart($outputText);

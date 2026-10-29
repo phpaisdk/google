@@ -214,3 +214,10 @@ it('accepts opaque model ids for every implemented modality', function () {
         ->and(Google::model('future-image-model')->modelId())->toBe('future-image-model')
         ->and(Google::model('future-speech-model')->modelId())->toBe('future-speech-model');
 });
+
+it('rejects successful responses that carry no output', function (string $body) {
+    configureGoogleWith(new FakeHttpClient(200, $body));
+    Google::create(['apiKey' => 'test']);
+
+    expect(fn() => Generate::text('Hi')->model(Google::model('gemini'))->run())->toThrow(AiSdk\Exceptions\InvalidResponseException::class);
+})->with(['{}', '[1,2]', '{"error":{"message":"quota"}}']);
