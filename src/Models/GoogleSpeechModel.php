@@ -8,10 +8,10 @@ use AiSdk\Contracts\BaseModel;
 use AiSdk\Contracts\SpeechModelInterface;
 use AiSdk\Exceptions\InvalidResponseException;
 use AiSdk\Google\GoogleOptions;
+use AiSdk\Google\Support\GoogleResponseParser;
 use AiSdk\Requests\SpeechRequest;
 use AiSdk\Responses\SpeechResponse;
 use AiSdk\Results\AudioData;
-use AiSdk\Support\Usage;
 use AiSdk\Utils\Support\Url;
 
 final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
@@ -49,7 +49,7 @@ final class GoogleSpeechModel extends BaseModel implements SpeechModelInterface
                 data: $audio['data'],
                 mimeType: $audio['mimeType'],
             ),
-            usage: Usage::empty(),
+            usage: GoogleResponseParser::usage($payload),
             rawResponse: $payload,
             providerMetadata: [$this->provider() => $this->metadata($payload)],
         );

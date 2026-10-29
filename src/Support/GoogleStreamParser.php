@@ -39,6 +39,10 @@ final class GoogleStreamParser
                 continue;
             }
 
+            if (is_array($payload['interaction'] ?? null)) {
+                $payload = array_replace($payload, $payload['interaction']);
+            }
+
             if (isset($payload['usage_metadata']) || isset($payload['usageMetadata']) || isset($payload['usage'])) {
                 $usage = GoogleResponseParser::usage($payload);
             }

@@ -82,6 +82,7 @@ it('fails image generation when Gemini returns malformed output image data', fun
 
 it('sends speech generation to the Gemini interactions endpoint and parses output audio', function () {
     $client = new FakeHttpClient(200, json_encode([
+        'usage' => ['total_input_tokens' => 100, 'total_cached_tokens' => 60, 'total_output_tokens' => 20, 'total_thought_tokens' => 5, 'total_tokens' => 125],
         'output_audio' => [
             'data' => base64_encode('audio-bytes'),
             'mime_type' => 'audio/L16;codec=pcm;rate=24000',
@@ -94,7 +95,12 @@ it('sends speech generation to the Gemini interactions endpoint and parses outpu
         ->voice('Kore')
         ->run();
 
-    expect($result->output->data)->toBe('audio-bytes')
+    expect($result->usage->inputTokens)->toBe(100)
+        ->and($result->usage->cachedInputTokens)->toBe(60)
+        ->and($result->usage->outputTokens)->toBe(25)
+        ->and($result->usage->reasoningTokens)->toBe(5)
+        ->and($result->usage->totalTokens)->toBe(125)
+        ->and($result->output->data)->toBe('audio-bytes')
         ->and($result->output->mimeType)->toBe('audio/L16;codec=pcm;rate=24000')
         ->and($client->lastRequest?->getUri()->getPath())->toBe('/v1beta/interactions')
         ->and($client->sentBody())->toBe([

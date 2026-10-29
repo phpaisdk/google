@@ -121,17 +121,17 @@ final class GoogleResponseParser
             return Usage::empty();
         }
 
-        $input = self::intValue($usage, 'input_tokens', 'inputTokens', 'promptTokenCount', 'prompt_token_count') ?? 0;
-        $output = self::intValue($usage, 'output_tokens', 'outputTokens', 'candidatesTokenCount', 'candidates_token_count') ?? 0;
-        $reasoning = self::intValue($usage, 'reasoning_tokens', 'reasoningTokens', 'thoughtsTokenCount', 'thoughts_token_count') ?? 0;
-        $cached = self::intValue($usage, 'cachedContentTokenCount', 'cached_content_token_count', 'cachedInputTokens', 'cached_input_tokens');
+        $input = self::intValue($usage, 'total_input_tokens', 'input_tokens', 'inputTokens', 'promptTokenCount', 'prompt_token_count') ?? 0;
+        $output = self::intValue($usage, 'total_output_tokens', 'output_tokens', 'outputTokens', 'candidatesTokenCount', 'candidates_token_count') ?? 0;
+        $reasoning = self::intValue($usage, 'total_thought_tokens', 'reasoning_tokens', 'reasoningTokens', 'thoughtsTokenCount', 'thoughts_token_count');
+        $cached = self::intValue($usage, 'total_cached_tokens', 'cachedContentTokenCount', 'cached_content_token_count', 'cachedInputTokens', 'cached_input_tokens');
         $total = self::intValue($usage, 'total_tokens', 'totalTokens', 'totalTokenCount', 'total_token_count');
 
         return new Usage(
             inputTokens: $input,
-            outputTokens: $output + $reasoning,
+            outputTokens: $output + ($reasoning ?? 0),
             totalTokens: $total,
-            reasoningTokens: $reasoning > 0 ? $reasoning : null,
+            reasoningTokens: $reasoning,
             cachedInputTokens: $cached,
         );
     }
