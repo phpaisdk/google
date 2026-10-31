@@ -2,6 +2,10 @@
 
 Notable changes to `aisdk/google`. Release notes are also published at https://github.com/phpaisdk/google/releases.
 
+## v0.11.0 — 2026-10-31
+
+- Requires `aisdk/core ^0.11.0`. Upgrade SDK packages together; no other changes in this package.
+
 ## v0.10.2 — 2026-10-29
 
 - Read Interactions token usage in responses and streams, including cached inputs and reasoning output; preserve speech usage.
